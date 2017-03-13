@@ -1,0 +1,64 @@
+﻿
+@{
+    Layout = null;
+}
+
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <link rel="stylesheet" href="https://cdn.static.runoob.com/libs/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://cdn.static.runoob.com/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://cdn.static.runoob.com/libs/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <title>AssignTask</title>
+</head>
+<body>
+    <a href="~/MyTest/EditTask">Add New Task</a>
+    <div>
+        <h1>Task List</h1>
+        <table class="table table-striped">
+            <tr>
+                <td></td>
+                <td>taskID</td>
+                <td>Title</td>
+                <td>Due date</td>
+                <td>Priority</td>
+                <td>User</td>
+                <td>Content</td>
+                <td>Situation</td>
+            </tr>
+            @foreach (var task in ViewBag.PageInfo.GetData())
+            {
+                <tr>
+                    <td><a href="/MyTest/EditTask1?taskID=@task.T_ID" >Edit</a></td>
+                    <td>@task.T_ID</td>
+                    <td>@task.T_Title</td>
+                    <td>@task.T_Duedate</td>
+                    <td>@task.T_Priority</td>
+                    <td>@task.U_Name</td>
+                    <td>@task.T_Contents</td>
+                    <td>@task.T_Situation</td>
+                </tr>
+            }
+        </table>
+        <div style="text-align: center">
+            <ul class="pagination">
+                @for (var i = ViewBag.PageInfo.StartPage; i <= ViewBag.PageInfo.EndPage; i++)
+                {
+                    if (i == ViewBag.PageInfo.PageIndex)
+                    {
+                            <li class="active center"><a href="/MyTest/AssignTask/@i">@i</a></li>
+                        }
+                        else
+                        {
+                            <li><a href="/MyTest/AssignTask/@i">@i</a></li>
+                        }
+
+                 }
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

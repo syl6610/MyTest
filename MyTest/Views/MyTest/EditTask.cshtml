@@ -1,0 +1,144 @@
+﻿@model ViewModel.ViewTask
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <link rel="stylesheet" href="https://cdn.static.runoob.com/libs/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://cdn.static.runoob.com/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://cdn.static.runoob.com/libs/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <title>EidtTask</title>
+    <style type="text/css">
+        .title {
+            width: 100px;
+            text-align: right;
+        }
+
+        .text {
+            padding-left: 10px;
+            width: 300px;
+        }
+    </style>
+
+</head>
+
+<body>
+    <div>
+        <h1>Task Editer</h1>
+        <form name="form" id="taskInfo" action="/MyTest/EditTask">
+            <table>
+                <tr>
+                    <td class="title">TaskID : </td>
+                    <td style="padding:10px 10px"><input class="text" type="text" name="T_ID" id="T_ID" /></td>
+                </tr>
+                <tr>
+                    <td class="title">Title : </td>
+                    <td style="padding:10px 10px"><input class="text" type="text" name="T_Title" id="T_Title"/><span id="Title"></span></td>
+                </tr>
+                <tr>
+                    <td class="title">Due date : </td>
+                    <td style="padding:10px 10px"><input type="date" name="T_Duedate" id="T_Duedate"/><span id="Duedate"></span></td>
+                </tr>
+                <tr>
+                    <td class="title">Priority : </td>
+                    <td style="padding:10px 10px">
+                        <input checked="checked" type="radio" name="T_Priority" id="T_Priority_high" value="higher" />high
+                        <input type="radio" name="T_Priority" id="T_Priority_low" value="lower" />low
+                    </td>
+                </tr>
+                <tr>
+                    <td class="title">Content : </td>
+                    <td style="padding:10px 10px"><textarea class="text" name="T_Contents" id="T_Contents"></textarea></td>
+                </tr>
+                <tr>
+                    <td class="title">Leader : </td>
+                    <td style="padding:10px 10px">
+                        <select name="U_ID" id="U_ID">
+                            <option></option>
+                            @foreach (var user in ViewBag.UserList)
+                            {
+                                <option value="@user.U_ID">@user.U_Name</option>
+                            }
+                        </select>
+                    </td>
+
+
+                </tr>
+                <tr>
+                    <td class="title">Situation : </td>
+                    <td style="padding:10px 10px">
+                        <input checked="checked" type="radio" name="T_Situation" id="T_Situation_Unfinished" value="Unfinished" />Unfinished
+                        <input type="radio" name="T_Situation" id="T_Situation_Finished" value="Finished" />Finished
+                    </td>
+
+
+                </tr>
+                <tr>
+                    <td></td>
+                    <td style="padding:10px 10px">
+                        <input type="button" id="submit" value="Submit" />
+                    </td>
+                </tr>
+
+            </table>
+        </form>
+    </div>
+
+    <script>
+        window.onload = function () {
+            $("#T_ID").attr("value",@Model.T_ID);
+            $("#T_Title").attr("value",@Model.T_Title);
+            if(@Model.T_Duedate ==null)
+            {
+                $("#T_Duedate").attr("defaultValue",new Date());
+            }else
+            {
+                $("#T_Duedate").attr("value",@Model.T_Duedate);
+            }
+            if(@Model.T_Priority == "high" || @Model.T_Priority == null)
+            {
+                $("T_Priority_high").attr("checked",'checked');
+            }else{
+                $("T_Priority_low").attr("checked",'checked');
+            }
+
+            $("#T_Contents").attr("value",@Model.T_Contents);
+            $("#U_ID").attr("value",@Model.U_ID);
+
+        }
+
+        $("#submit").click(function () {
+
+            if ($("#T_Title").val() == '') {
+                $("#Title").html("<font color=red>Title is Required</font>");
+                return false;
+            } else
+            {
+                $("#Title").html("");
+            }
+            if ($("#T_Duedate").val() == '') {
+                $("#Duedate").html("<font color=red>Due date is Required</font>");
+                return false;
+            } else {
+                $("#Duedate").html("");
+            }
+            $.ajax({
+                type: "POST",
+                url: "/MyTest/EditTask",
+                data: $('#taskInfo').serialize(),
+                error: function (request) {
+                    alert("ERROR");
+                },
+                success: function (data) {
+
+                }
+            });
+
+        })
+    </script>
+</body>
+</html>
