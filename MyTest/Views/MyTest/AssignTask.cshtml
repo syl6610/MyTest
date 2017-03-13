@@ -1,26 +1,10 @@
 ﻿
-@{
-    Layout = null;
-}
-
-
-<!DOCTYPE html>
-
-<html>
-<head>
-    <meta name="viewport" content="width=device-width" />
-    <link rel="stylesheet" href="https://cdn.static.runoob.com/libs/bootstrap/3.3.7/css/bootstrap.min.css">
-    <script src="https://cdn.static.runoob.com/libs/jquery/2.1.1/jquery.min.js"></script>
-    <script src="https://cdn.static.runoob.com/libs/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-    <title>AssignTask</title>
-</head>
-<body>
-    <a href="~/MyTest/EditTask">Add New Task</a>
-    <div>
-        <h1>Task List</h1>
-        <table class="table table-striped">
+<a href="~/MyTest/EditTask">Add New Task</a>
+<div>
+    <h1>Task List</h1>
+    <table class="table table-striped">
+        <thead>
             <tr>
-                <td></td>
                 <td>taskID</td>
                 <td>Title</td>
                 <td>Due date</td>
@@ -28,37 +12,101 @@
                 <td>User</td>
                 <td>Content</td>
                 <td>Situation</td>
+                <td>Operation</td>
             </tr>
-            @foreach (var task in ViewBag.PageInfo.GetData())
-            {
-                <tr>
-                    <td><a href="/MyTest/EditTask1?taskID=@task.T_ID" >Edit</a></td>
-                    <td>@task.T_ID</td>
-                    <td>@task.T_Title</td>
-                    <td>@task.T_Duedate</td>
-                    <td>@task.T_Priority</td>
-                    <td>@task.U_Name</td>
-                    <td>@task.T_Contents</td>
-                    <td>@task.T_Situation</td>
-                </tr>
-            }
-        </table>
-        <div style="text-align: center">
-            <ul class="pagination">
-                @for (var i = ViewBag.PageInfo.StartPage; i <= ViewBag.PageInfo.EndPage; i++)
-                {
-                    if (i == ViewBag.PageInfo.PageIndex)
-                    {
-                            <li class="active center"><a href="/MyTest/AssignTask/@i">@i</a></li>
-                        }
-                        else
-                        {
-                            <li><a href="/MyTest/AssignTask/@i">@i</a></li>
-                        }
 
-                 }
-            </ul>
-        </div>
-    </div>
-</body>
-</html>
+        </thead>
+        <tbody id="table">
+
+        </tbody>
+</table>
+    <nav aria-label="Page navigation">
+        <ul id="pagination" class="pagination">
+
+            
+
+        </ul>
+    </nav>
+</div>
+
+
+
+<script type="text/javascript">
+    $(function () {
+        var STATIC_ROWS = 10;
+        var tableData = {};
+        
+        var renderPage = function () {
+            var pageHtml = "";
+            $('#pagination').html(pageHtml);
+            if (tableData.Page != 1)
+                pageHtml += '<li><a href="javascript:void(0);" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a></li>';
+
+            for (var i = 0; i < tableData.Total; i++) {
+                var active = '';
+                if ((i + 1) == tableData.Page)
+                    active = 'class="active"';
+                else
+                    active = '';
+                pageHtml += '<li ' + active + '><a href="javascript:void(0);">' + (i + 1) + '</a></li>';
+            }
+            if (tableData.Page != tableData.Total)
+                pageHtml += '<li><a href="javascript:void(0);" aria-label="Next"><span aria-hidden="true">&raquo;</span></a></li>';
+            $('#pagination').html(pageHtml);
+        };
+
+        var renderBody = function () {
+            var recordHtml = "";
+            $('#table').html(recordHtml);
+            for (var i = 0; i < tableData.Rows.length; i++) {
+                recordHtml += '<tr>';
+                recordHtml += '<td>' + tableData.Rows[i].T_ID + '</td>';
+                recordHtml += '<td>' + tableData.Rows[i].T_Title + '</td>';
+                recordHtml += '<td>' + tableData.Rows[i].T_Duedate + '</td>';
+                recordHtml += '<td>' + tableData.Rows[i].T_Priority + '</td>';
+                recordHtml += '<td>' + tableData.Rows[i].U_Name + '</td>';
+                recordHtml += '<td>' + tableData.Rows[i].T_Contents + '</td>';
+                recordHtml += '<td>' + tableData.Rows[i].T_Situation + '</td>';
+                recordHtml += '<td>' + '<a href="editTask/' + tableData.Rows[i].T_ID + '">Edit</a></td>';
+                recordHtml += '</tr>';
+            }
+            $('#table').html(recordHtml);
+        };
+
+        var bindPageEnvent = function () {
+            $('#pagination a').each(function () {
+                $(this).click(function () {
+                    var text = $(this).text();
+                    if (text == '»') {
+                        getPageData(STATIC_ROWS,tableData.Page+1 );
+                    }
+                    else if (text == '«') {
+                        getPageData(STATIC_ROWS, tableData.Page - 1);
+                    }
+                    else {
+                        getPageData(STATIC_ROWS, $(this).text());
+                    }
+                });
+            });
+        }
+
+        var getPageData = function (rows, page) {
+            $.getJSON("TaskPage", { rows: rows, page: page }, function (data, textStatus, jqXHR) {
+
+                if (textStatus == "success") {
+                    console.log(data);
+                    tableData = data;
+                    renderPage();
+                    renderBody();
+                    bindPageEnvent();
+                }
+                else {
+                    console.log(jqXHR);
+                }
+            });
+        };
+
+        getPageData(STATIC_ROWS, 1);
+
+    });
+</script>

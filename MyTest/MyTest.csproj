@@ -260,6 +260,10 @@
       <Project>{c417acdf-99a5-432a-b21b-7cb9b1e74dfd}</Project>
       <Name>BLL</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Model\Model.csproj">
+      <Project>{5DC39133-7859-4C6C-8741-5F1B7343D071}</Project>
+      <Name>Model</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ViewModel\ViewModel.csproj">
       <Project>{639b29cc-1acf-4ad1-8209-24ac075a9809}</Project>
       <Name>ViewModel</Name>
