@@ -1,0 +1,41 @@
+(1) When developing a web application that will be accessed by users in different locations/time zones, what considerations would you take when planning the application design and infrastructure? (20 points)
+
+1.Time conversion in different time zones
+2.Shoud use uniform timestamp to store data
+3.Get user location and time zone
+
+(2) Describe the most common security vulnerabilities to a web application and how you can prevent them (20 points)
+
+1.Authentication and session vulnerability
+Use SSL to protect our passwords and session ID and make sure that the log off action can close all sessions
+
+2.Data validation vulnerability
+Strict data validation is required
+
+3.Information exposure
+Necessary encryption processing and secure storage
+
+
+(3) Describe multi-tenancy and how it could be useful (20 points)
+
+Multi-tenancy is a software architecture technology that can share the same system or program components in a multi-user environment, and to ensure the isolation of data between users. 
+
+Use the multi-tenancy well can reduce costs, choose a appropriate plan according to the project requirements will educe the maintenance cost and 
+improve service
+
+(4) Summarize an appropriate user registration system (10 points)
+1.Determine whether the user is registered
+2.User registration information verification
+3.Determine whether certain information is occupied
+
+(5) Have you ever used an ORM? If so, which one(s). Provide characteristics of the ORMS you have used. (e.g. benefits/disadvantages) (10 points)
+
+The entity framework
+
+benefits:
+1.High code readability and High maintainability
+2.Easy to operate data using Linq
+
+disadvantages:
+1.Low efficiency in complex queries
+2.No extensions available
