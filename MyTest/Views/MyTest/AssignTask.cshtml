@@ -1,11 +1,12 @@
 ﻿
-<a href="~/MyTest/EditTask">Add New Task</a>
+
 <div>
     <h1>Task List</h1>
+    <a class="right" href="~/MyTest/EditTask/0">Add New Task</a>
     <table class="table table-striped">
         <thead>
             <tr>
-                <td>taskID</td>
+                <td>TaskID</td>
                 <td>Title</td>
                 <td>Due date</td>
                 <td>Priority</td>
@@ -35,6 +36,20 @@
     $(function () {
         var STATIC_ROWS = 10;
         var tableData = {};
+
+        var getPageData = function (rows, page) {
+            $.getJSON("TaskPage", { rows: rows, page: page }, function (data, textStatus) {
+
+                if (textStatus == "success") {
+                    tableData = data;
+                    renderPage();
+                    renderBody();
+                    bindPageEnvent();
+                }
+            });
+        };
+
+        getPageData(STATIC_ROWS, 1);
         
         var renderPage = function () {
             var pageHtml = "";
@@ -46,8 +61,6 @@
                 var active = '';
                 if ((i + 1) == tableData.Page)
                     active = 'class="active"';
-                else
-                    active = '';
                 pageHtml += '<li ' + active + '><a href="javascript:void(0);">' + (i + 1) + '</a></li>';
             }
             if (tableData.Page != tableData.Total)
@@ -60,13 +73,13 @@
             $('#table').html(recordHtml);
             for (var i = 0; i < tableData.Rows.length; i++) {
                 recordHtml += '<tr>';
-                recordHtml += '<td>' + tableData.Rows[i].T_ID + '</td>';
+                recordHtml += '<td>' + dataFormat(tableData.Rows[i].T_ID) + '</td>';
                 recordHtml += '<td>' + tableData.Rows[i].T_Title + '</td>';
-                recordHtml += '<td>' + tableData.Rows[i].T_Duedate + '</td>';
-                recordHtml += '<td>' + tableData.Rows[i].T_Priority + '</td>';
-                recordHtml += '<td>' + tableData.Rows[i].U_Name + '</td>';
-                recordHtml += '<td>' + tableData.Rows[i].T_Contents + '</td>';
-                recordHtml += '<td>' + tableData.Rows[i].T_Situation + '</td>';
+                recordHtml += '<td>' + dateFormat(tableData.Rows[i].T_Duedate) + '</td>';
+                recordHtml += '<td>' + dataFormat(tableData.Rows[i].T_Priority) + '</td>';
+                recordHtml += '<td>' + dataFormat(tableData.Rows[i].U_Name) + '</td>';
+                recordHtml += '<td>' + dataFormat(tableData.Rows[i].T_Contents) + '</td>';
+                recordHtml += '<td>' + (tableData.Rows[i].T_Situation ? 'Done' : '') + '</td>';
                 recordHtml += '<td>' + '<a href="editTask/' + tableData.Rows[i].T_ID + '">Edit</a></td>';
                 recordHtml += '</tr>';
             }
@@ -90,23 +103,32 @@
             });
         }
 
-        var getPageData = function (rows, page) {
-            $.getJSON("TaskPage", { rows: rows, page: page }, function (data, textStatus, jqXHR) {
+        var dateFormat = function (cellval) {
 
-                if (textStatus == "success") {
-                    console.log(data);
-                    tableData = data;
-                    renderPage();
-                    renderBody();
-                    bindPageEnvent();
-                }
-                else {
-                    console.log(jqXHR);
-                }
-            });
-        };
+            if (cellval != null)
+            {
+                var date = new Date(parseInt(cellval.replace("/Date(", "").replace(")/", ""), 10));
 
-        getPageData(STATIC_ROWS, 1);
+                var month = date.getMonth() + 1 < 10 ? "0" + (date.getMonth() + 1) : date.getMonth() + 1;
 
+                var currentDate = date.getDate() < 10 ? "0" + date.getDate() : date.getDate();
+
+                return date.getFullYear() + "-" + month + "-" + currentDate;
+            }
+            else
+            {
+                return "";
+            }
+        }
+
+        var dataFormat = function (data) {
+
+            if (data != null) {
+                return data;
+            }
+            else {
+                return "";
+            }
+        }
     });
 </script>

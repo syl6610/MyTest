@@ -4,29 +4,11 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using ViewModel;
-using BLL;
 using Model;
+using AutoMapper;
 
 namespace MyTest.Controllers
 {
-    public class TaskViewModel
-    {
-        public int T_ID { get; set; }
-        public string T_Title { get; set; }
-        public Nullable<System.DateTime> T_Duedate { get; set; }
-        public Nullable<int> U_ID { get; set; }
-        public string T_Priority { get; set; }
-        public string T_Situation { get; set; }
-        public string T_Contents { get; set; }
-    }
-
-    public class PageViewModel
-    {
-        public int Records { set; get; }
-        public int Page { set; get; }
-        public int Total { set; get; }
-        public List<TaskViewModel> Rows { set; get; }
-    }
 
     public class MyTestController : Controller
     {
@@ -37,30 +19,25 @@ namespace MyTest.Controllers
             _context = new AssignEntities();
         }
 
-        // GET: MyTest
-        public ActionResult Index()
-        {
-            return View();
-        }
-
-        TaskManager taskmanager = new TaskManager();
-        UserManager usermanager = new UserManager();
-
         public ActionResult AssignTask()
         {
             return View();
         }
 
-        //page start with 1
+        /// <summary>
+        /// Pagination
+        /// </summary>
+        /// <param name="rows"></param>
+        /// <param name="page"></param>
+        /// <returns>Current page data</returns>
         [HttpGet]
         public ActionResult TaskPage(int rows, int page)
         {
             var model = new PageViewModel();
-            model.Records = _context.Tasks.Count();
-
-            model.Total = (model.Records / rows) + (model.Records % rows == 0 ? 0 : 1);
-            model.Page = page;
-            model.Rows = _context.Tasks.OrderBy(x => x.T_ID)
+            model.Records = _context.Tasks.Count();//total records
+            model.Total = (int)Math.Ceiling(model.Records / (double)rows);//total pages
+            model.Page = page;//current page
+            model.Rows = _context.Tasks.OrderByDescending(x => x.T_ID)
                 .Skip(rows * (page - 1))
                 .Take(rows)
                 .Select(x => new TaskViewModel
@@ -69,38 +46,83 @@ namespace MyTest.Controllers
                     T_Title = x.T_Title,
                     T_Duedate = x.T_Duedate,
                     T_Priority = x.T_Priority,
-                    T_Situation = x.T_Situation,
+                    T_Situation = x.T_Situation == "Done" ? true : false,
                     T_Contents = x.T_Contents,
-                    U_ID = x.U_ID
+                    U_ID = x.U_ID,
+                    U_Name = x.Users.U_Name
                 })
                 .ToList();
+
             return Json(model, JsonRequestBehavior.AllowGet);
         }
 
+
+        /// <summary>
+        /// Task edit page 
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpGet]
         public ActionResult EditTask(int id)
         {
-            ViewBag.UserList = usermanager.GetUser();
-            ViewTask vtask = new ViewTask();
-            vtask = taskmanager.GetTaskByID(id);
+            
+            var vtask = new TaskViewModel();
+            vtask = _context.Tasks.Where(x => x.T_ID == id)
+                .Select(x => new TaskViewModel
+                {
+                    T_ID = x.T_ID,
+                    T_Title = x.T_Title,
+                    T_Duedate = x.T_Duedate,
+                    T_Priority = x.T_Priority,
+                    T_Situation = x.T_Situation == "Done" ? true : false,
+                    T_Contents = x.T_Contents,
+                    U_ID = x.U_ID,
+                }).FirstOrDefault();
+
+            var userList = new SelectList(_context.Users, "U_ID", "U_Name", (vtask == null ? 0 : vtask.U_ID));
+            ViewData["userList"]= userList;
             return View("EditTask", vtask);
             
         }
 
+
+        /// <summary>
+        /// Processing data
+        /// 1. TaskID == 0 : Add task
+        /// 2. TaskID != 0 : Update task
+        /// </summary>
+        /// <param name="vtask"></param>
+        /// <returns></returns>
         [HttpPost]
-        public ActionResult EditTask(ViewTask vtask)
+        public ActionResult EditTask(TaskViewModel vtask)
         {
-            ViewBag.UserList = usermanager.GetUser();
+            string tip = "";
+            Tasks task = new Tasks()
+            {
+                T_ID = vtask.T_ID,
+                T_Title = vtask.T_Title,
+                T_Duedate = vtask.T_Duedate,
+                T_Priority = vtask.T_Priority,
+                T_Situation = vtask.T_Situation ? "Done" : null,
+                T_Contents = vtask.T_Contents,
+                U_ID = vtask.U_ID,
+            };
             if (vtask.T_ID == 0)
             {
-                taskmanager.AddTask(vtask);
+                _context.Entry<Tasks>(task).State = System.Data.Entity.EntityState.Added;
+                tip = "Task has been added";
             }
             else
             {
-                taskmanager.UpdateTask(vtask);
+                _context.Entry<Tasks>(task).State = System.Data.Entity.EntityState.Modified;
+                tip = "Task has been updated";
             }
-            return View(vtask);
-               
+            _context.SaveChanges();
+            var userList = new SelectList(_context.Users, "U_ID", "U_Name", vtask.U_ID);
+            ViewData["userList"] = userList;
+            ViewData["tip"] = tip;
+            return View("EditTask", vtask);
+
         }
 
     }
